@@ -1,14 +1,25 @@
-import { getRequestCountForTabId } from './utils.js'
+import { getRequestCountForTabId, getCurrentTabId, setRequestCountForTabId } from './utils.js'
 
 function displayRequestCount(count) {
     document.getElementById('request-display').textContent = count;
 }
 
 async function main() {
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    const tabId = await getCurrentTabId()
 
-    if (tab?.id !== undefined)
-        displayRequestCount(await getRequestCountForTabId(tab.id))
+    if (tabId !== undefined)
+        displayRequestCount(await getRequestCountForTabId(tabId))
+}
+
+async function resetRequestCount() {
+    const tabId = await getCurrentTabId()
+
+    if (tabId === undefined)
+        return
+
+    setRequestCountForTabId(tabId, 0);
+    displayRequestCount(0);
 }
 
 main();
+document.getElementById("reset-button").addEventListener("click", resetRequestCount)

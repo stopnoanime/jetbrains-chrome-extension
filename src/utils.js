@@ -9,3 +9,9 @@ export function setRequestCountForTabId(tabId, requestCount) {
 
     chrome.storage.session.set({ [tabId]: requestCount })
 }
+
+export async function getCurrentTabId() {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+
+    return tab?.id
+}
