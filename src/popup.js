@@ -26,10 +26,8 @@ async function updateDisplayRequestCount(changeObject) {
     if (tabId === undefined)
         return
 
-    if (changeObject[tabId]) {
-        const newCount = changeObject[tabId].newValue;
-        displayRequestCount(newCount);
-    }
+    if (changeObject[tabId])
+        displayRequestCount(changeObject[tabId].newValue);
 }
 
 init();

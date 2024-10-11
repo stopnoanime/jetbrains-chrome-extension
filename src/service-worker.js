@@ -15,3 +15,9 @@ chrome.webRequest.onCompleted.addListener(
     },
     { urls: ["<all_urls>"] }
 );
+
+chrome.storage.session.onChanged.addListener((changeObject) => {
+    for (const key in changeObject) {
+        chrome.action.setBadgeText({ text: changeObject[key].newValue.toString(), tabId: Number(key) });
+    }
+})
