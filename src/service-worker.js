@@ -1,23 +1,30 @@
-import { getRequestCountForTabId, setRequestCountForTabId } from './utils.js'
-import { SyncQueue } from './SyncQueue.js'
-
-const queue = new SyncQueue(async (tabId) => {
-    const count = await getRequestCountForTabId(tabId);
-    await setRequestCountForTabId(tabId, count + 1);
-})
+const requestCounts = chrome.storage.session.get()
 
 chrome.webRequest.onCompleted.addListener(
-    async (details) => {
-        if (details.tabId == -1)
+    async (req) => {
+        if (req.tabId == -1)
             return
 
-        await queue.addToQueue(details.tabId);
+        const counts = await requestCounts;
+
+        if (!counts[req.tabId])
+            counts[req.tabId] = 0;
+
+        counts[req.tabId]++;
+        await chrome.storage.session.set({ [req.tabId]: counts[req.tabId] })
     },
     { urls: ["<all_urls>"] }
 );
 
-chrome.storage.session.onChanged.addListener((changeObject) => {
-    for (const key in changeObject) {
-        chrome.action.setBadgeText({ text: changeObject[key].newValue.toString(), tabId: Number(key) });
+chrome.storage.session.onChanged.addListener((changes) => {
+    for (const key in changes) {
+        chrome.action.setBadgeText({ text: changes[key].newValue?.toString() || '', tabId: Number(key) });
     }
 })
+
+chrome.runtime.onMessage.addListener(async msg => {
+    if (msg?.type === 'reset-count') {
+        delete (await requestCounts)[msg.tabId]
+        chrome.storage.session.remove(msg.tabId)
+    }
+});

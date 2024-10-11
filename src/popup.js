@@ -1,8 +1,4 @@
-import { getRequestCountForTabId, getCurrentTabId, setRequestCountForTabId } from './utils.js'
-
-function displayRequestCount(count) {
-    document.getElementById('request-display').textContent = count;
-}
+import { getRequestCountForTabId, getCurrentTabId, displayRequestCount } from './utils.js'
 
 async function init() {
     const tabId = await getCurrentTabId()
@@ -11,23 +7,18 @@ async function init() {
         displayRequestCount(await getRequestCountForTabId(tabId))
 }
 
-async function resetRequestCount() {
-    const tabId = await getCurrentTabId()
-
-    if (tabId === undefined)
-        return
-
-    setRequestCountForTabId(tabId, 0);
-}
-
 async function updateDisplayRequestCount(changeObject) {
     const tabId = await getCurrentTabId()
 
-    if (tabId === undefined)
-        return
-
-    if (changeObject[tabId])
+    if (tabId !== undefined && changeObject[tabId])
         displayRequestCount(changeObject[tabId].newValue);
+}
+
+async function resetRequestCount() {
+    const tabId = await getCurrentTabId()
+
+    if (tabId !== undefined)
+        chrome.runtime.sendMessage({ type: 'reset-count', tabId: tabId })
 }
 
 init();
