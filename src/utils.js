@@ -4,10 +4,10 @@ export async function getRequestCountForTabId(tabId) {
     return (await chrome.storage.session.get(tabId))[tabId] || 0;
 }
 
-export function setRequestCountForTabId(tabId, requestCount) {
+export async function setRequestCountForTabId(tabId, requestCount) {
     tabId = tabId.toString();
 
-    chrome.storage.session.set({ [tabId]: requestCount })
+    await chrome.storage.session.set({ [tabId]: requestCount })
 }
 
 export async function getCurrentTabId() {
